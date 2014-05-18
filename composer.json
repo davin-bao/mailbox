@@ -1,0 +1,23 @@
+{
+    "name": "davin-bao/mailbox",
+    "description": "",
+    "authors": [
+        {
+            "name": "davin-bao",
+            "email": "davin.bao@gmail.com",
+            "homepage": "http://davinbao.blog.com/",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0",
+        "illuminate/support": "4.1.*",
+        "laravelbook/ardent": "dev-master"
+    },
+    "autoload": {
+        "psr-0": {
+            "DavinBao\\Mailbox": "src/"
+        }
+    },
+    "minimum-stability": "stable"
+}
