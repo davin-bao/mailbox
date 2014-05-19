@@ -34,12 +34,15 @@ class RemoteMailbox
         $this->password = $password;
         $this->serverEncoding = $serverEncoding;
 
-        if($attachmentsDir) {
-            if(!is_dir($attachmentsDir)) {
-                throw new ImapMailboxException('Directory "' . $attachmentsDir . '" not found');
-            }
-            $this->attachmentsDir = rtrim(realpath($attachmentsDir), '\\/');
+        if(!is_dir($attachmentsDir)) {
+            mkdir($attachmentsDir, '0755', true);
         }
+        if(!is_dir($attachmentsDir)) {
+            throw new ImapMailboxException('Directory "' . $attachmentsDir . '" not found');
+        }
+        $this->attachmentsDir = rtrim(realpath($attachmentsDir), '\\/');
+
+
     }
 
 
@@ -448,7 +451,8 @@ class RemoteMailbox
             }
         }
         if(!empty($params['charset'])) {
-            $data = iconv(strtoupper($params['charset']), $this->serverEncoding . '//IGNORE', $data);
+            //$data = iconv(strtoupper($params['charset']), $this->serverEncoding . '//IGNORE', $data);
+            $data = mb_convert_encoding($data, strtoupper($this->serverEncoding), strtoupper($params['charset']));
         }
 
         // attachments

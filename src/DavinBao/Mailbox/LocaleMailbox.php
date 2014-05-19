@@ -27,8 +27,8 @@ class LocaleMailbox
      */
     public function register(array $accountData){
         $this->account = Account::firstOrCreate($accountData);
-        if($this->account){
-            return true;
+        if($this->account->save()){
+            return $this->account;
         }else{
             return $this->account->errors()->all();
         }
@@ -39,7 +39,33 @@ class LocaleMailbox
     }
 
     public function isExistInLocale($mailUid){
+        if(Entity::where('uid', '=', $mailUid)->count()>0){
+            return true;
+        }
+        return false;
+    }
 
+    public function saveMail($incomingMail){
+        $entity = new Entity();
+        $entity->date = $incomingMail->date;
+        $entity->subject = $incomingMail->subject;
+        $entity->from_name = $incomingMail->fromName;
+        $entity->from_address = $incomingMail->fromAddress;
+        $entity->text_plain = $incomingMail->fromAddress;
+        $entity->text_html = $incomingMail->textHtml;
+        $entity->uid = $incomingMail->uid;
+        $this->account->Entities()->save($entity);
+        foreach($incomingMail->attachments as $attach){
+            $attachment = new Attachment();
+            $attachment->name = $attach->name;
+            $attachment->file_path = $attach->filePath;
+            $attachment->ext_name = $attach->extName;
+            $entity->Attachments()->save($attachment);
+        }
+        foreach($incomingMail->to as $key=>$value){
+            $address = new Address();
+            
+        }
     }
 
     public function getInbox($orders, $reverse = false){

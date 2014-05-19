@@ -36,6 +36,7 @@ class Mailbox {
 
     public function __construct($app)
     {
+        set_time_limit(0);
         $this->_app = $app;
     }
 
@@ -47,21 +48,6 @@ class Mailbox {
     }
 
     public function signIn($userId){
-
-
-      \Queue::push(function($job)
-      {
-        $nowUtc = new \DateTime( 'now',  new \DateTimeZone( 'UTC' ) );
-
-        \Log::info('10This is was written via the MailWorker class at '.$nowUtc->format('Y-m-d h:i:s').' id is '.$job->getJobId());
-        $job->release(10);
-      },array('message' => 'aa'), 'high');
-
-        //$date = \Carbon::now()->addMinutes(1);
-        \Queue::push( '\DavinBao\Mailbox\MailWorker@receiveMail', array('message' => 'aa'), 'low');
-
-        var_dump(1);
-        exit;
         $account = $this->getLocaleBox()->getAccount($userId);
         if($account){
             $this->remoteBox = new RemoteMailbox(
@@ -72,7 +58,7 @@ class Mailbox {
                 $account->host_port,
                 false,
                 'utf-8',
-                $this->_app['config']->get('mailbox::attachments_dir')
+                storage_path()."\\attachments"
             );
             $this->isRegister = true;
         }
@@ -90,9 +76,20 @@ class Mailbox {
         return $this->getLocaleBox()->register($accountData);
     }
 
+    public function isSaved($mailId){
+        $mailUid = $this->remoteBox->getUid($mailId);
+        if($this->localeBox->isExistInLocale($mailUid)){
+            return true;
+        }
+        return false;
+    }
+
     public function receive(){
         $updated_at = $this->getLocaleBox()->getUpdatedAt();
-        return $this->remoteBox->searchMailbox('SINCE "'.$updated_at.'"');
+        $mailIds = $this->remoteBox->searchMailbox('SINCE "'.$updated_at.'"');
+        foreach($mailIds as $mailId){
+            $this->saveToLocale($mailId);
+        }
     }
 
     public function search($flag= self::BOX_UNSEEN, $since=null, $order = self::SORT_DATE, $reverse = false){
@@ -107,6 +104,18 @@ class Mailbox {
         }
     }
 
+    public function saveToLocale($mailId){
+        if($this->isSaved($mailId)){
+            return;
+        }
+        $incomingMail = $this->remoteBox->getMail($mailId);
+        var_dump($incomingMail);
+       //$this->localeBox->saveMail($incomingMail);
+    }
+
+    public function refreshLocaleStatus($mailsIds){
+        $mailStatus = $this->remoteBox->getMailsInfo($mailsIds);
+    }
 
     public function getMail($mailId){}
 

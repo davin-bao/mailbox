@@ -39,15 +39,14 @@ class Entity extends Ardent
      * @var array
      */
     public static $rules = array(
-
     );
 
     public static $relationsData = array(
-        'account'    => array(self::BELONGS_TO, 'Account'),
-        'attachments'    => array(self::HAS_MANY, 'Attachment'),
-        'to_addresses' => array(self::BELONGS_TO_MANY, 'Address', 'to_addresses', 'mail_entity_id', 'mail_address_id'),
-        'cc_addresses' => array(self::BELONGS_TO_MANY, 'Address', 'cc_addresses', 'mail_entity_id', 'mail_address_id'),
-        'reply_addresses' => array(self::BELONGS_TO_MANY, 'Address', 'reply_addresses', 'mail_entity_id', 'mail_address_id')
+        'Account'    => array(self::BELONGS_TO, 'Account'),
+        'Attachments'    => array(self::HAS_MANY, 'Attachment'),
+        'ToAddresses' => array(self::BELONGS_TO_MANY, 'Address', 'to_addresses', 'mail_entity_id', 'mail_address_id'),
+        'CcAddresses' => array(self::BELONGS_TO_MANY, 'Address', 'cc_addresses', 'mail_entity_id', 'mail_address_id'),
+        'ReplyAddresses' => array(self::BELONGS_TO_MANY, 'Address', 'reply_addresses', 'mail_entity_id', 'mail_address_id')
     );
     /**
      * Creates a new instance of the model

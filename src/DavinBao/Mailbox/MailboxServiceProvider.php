@@ -28,6 +28,7 @@ class MailboxServiceProvider extends ServiceProvider {
 	{
 		//
         $this->registerMailbox();
+        $this->registerCommands();
 	}
 
 
@@ -53,4 +54,17 @@ class MailboxServiceProvider extends ServiceProvider {
 		return array();
 	}
 
+
+    public function registerCommands()
+    {
+
+        $this->app['command.mailbox.work'] = $this->app->share(function($app)
+        {
+            return new MailQueueCommand($app);
+        });
+
+        $this->commands(
+            'command.mailbox.work'
+        );
+    }
 }

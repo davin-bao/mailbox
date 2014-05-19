@@ -39,13 +39,17 @@ class Account extends Ardent
      * @var array
      */
     public static $rules = array(
-
+        'host_name' => 'required',
+        'host_port' => 'required|numeric',
+        'host_protocol' => 'min:4',
+        'email' => 'required|email|unique:mail_accounts',
+        'password' => 'required|min:2',
     );
 
 
 
     public static $relationsData = array(
-        'entities'    => array(self::HAS_MANY, 'Entity')
+        'Entities'    => array(self::HAS_MANY, 'Entity')
     );
 
     /**

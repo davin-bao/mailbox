@@ -10,25 +10,50 @@ namespace DavinBao\Mailbox;
 
 class MailWorker {
 
-    public function receiveMail($job, $data){
-        //$job->delete();
+    public function receiveRecentMail($job, $data){
+        $job->delete();
         \Log::info('receiving...');
-        $remoteBox = new RemoteMailbox(
-          'imap.exmail.qq.com',
-          'bwj@zhiyee.com',
-          'A!b2c3d4',
-          'imap',
-          '143',
-          false,
-          'utf-8',
-          storage_path()
-        );
-        $mailIds = $remoteBox->searchMailbox('ALL');
-        foreach ($mailIds as $mailId) {
-          $mail = $remoteBox->getMail($mailId);
-          \Log::info('received mail id :'.$mailId);
+        \Log::info(json_encode($data));
+        $userId = $data["user_id"];
+
+        $localeBox =  new LocaleMailbox();
+        $account = $localeBox->getAccount($userId);
+
+        if($account){
+            $remoteBox = new RemoteMailbox(
+                $account->host_name,
+                $account->email,
+                $account->password,
+                $account->host_protocol,
+                $account->host_port,
+                false,
+                'utf-8',
+                storage_path()."\\attachments"
+            );
+
+            $updated_at = $localeBox->getUpdatedAt();
+            $mailIds = $remoteBox->searchMailbox('SINCE "'.$updated_at.'"');
+
+
+            \Log::info(json_encode($mailIds));
         }
-        $job->release(5);
+
+//        $remoteBox = new RemoteMailbox(
+//          'imap.exmail.qq.com',
+//          'bwj@zhiyee.com',
+//          'A!b2c3d4',
+//          'imap',
+//          '143',
+//          false,
+//          'utf-8',
+//          storage_path()
+//        );
+//        $mailIds = $remoteBox->searchMailbox('ALL');
+//        foreach ($mailIds as $mailId) {
+//          $mail = $remoteBox->getMail($mailId);
+//          \Log::info('received mail id :'.$mailId);
+//        }
+//        $job->release(5);
     }
 
     public function fire($job, $data){
