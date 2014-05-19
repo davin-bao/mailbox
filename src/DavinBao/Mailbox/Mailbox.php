@@ -47,6 +47,21 @@ class Mailbox {
     }
 
     public function signIn($userId){
+
+
+      \Queue::push(function($job)
+      {
+        $nowUtc = new \DateTime( 'now',  new \DateTimeZone( 'UTC' ) );
+
+        \Log::info('10This is was written via the MailWorker class at '.$nowUtc->format('Y-m-d h:i:s').' id is '.$job->getJobId());
+        $job->release(10);
+      },array('message' => 'aa'), 'high');
+
+        //$date = \Carbon::now()->addMinutes(1);
+        \Queue::push( '\DavinBao\Mailbox\MailWorker@receiveMail', array('message' => 'aa'), 'low');
+
+        var_dump(1);
+        exit;
         $account = $this->getLocaleBox()->getAccount($userId);
         if($account){
             $this->remoteBox = new RemoteMailbox(
@@ -61,11 +76,6 @@ class Mailbox {
             );
             $this->isRegister = true;
         }
-
-        $date = \Carbon::now()->addSeconds(3);
-
-        \Queue::push( '\DavinBao\Mailbox\MailWorker', array('message' => 'aa'));
-        var_dump(1);
     }
 
     public function isRegister(){

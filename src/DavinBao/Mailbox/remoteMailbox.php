@@ -36,7 +36,7 @@ class RemoteMailbox
 
         if($attachmentsDir) {
             if(!is_dir($attachmentsDir)) {
-                throw new Exception('Directory "' . $attachmentsDir . '" not found');
+                throw new ImapMailboxException('Directory "' . $attachmentsDir . '" not found');
             }
             $this->attachmentsDir = rtrim(realpath($attachmentsDir), '\\/');
         }
@@ -476,7 +476,7 @@ class RemoteMailbox
                 );
                 $fileSysName = preg_replace('~[\\\\/]~', '', $mail->id . '_' . $attachmentId . '_' . preg_replace(array_keys($replace), $replace, $fileName));
                 $attachment->filePath = $this->attachmentsDir . DIRECTORY_SEPARATOR . $fileSysName;
-                $attachmentInfo = new SplFileInfo($attachment->filePath);
+                $attachmentInfo = new \SplFileInfo($attachment->filePath);
                 $attachment->extName =$attachmentInfo->getExtension();
                 file_put_contents($attachment->filePath, $data);
             }

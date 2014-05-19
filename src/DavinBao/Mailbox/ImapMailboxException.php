@@ -2,6 +2,6 @@
 
 namespace DavinBao\Mailbox;
 
-class ImapMailboxException extends Exception {
+class ImapMailboxException extends \Exception {
 
 }
