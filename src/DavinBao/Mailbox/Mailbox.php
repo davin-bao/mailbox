@@ -32,6 +32,8 @@ class Mailbox {
      */
     public $_app;
 
+    private $userId = 1;
+
     public function __construct($app)
     {
         set_time_limit(0);
@@ -46,6 +48,7 @@ class Mailbox {
     }
 
     public function signIn($userId){
+        $this->userId = $userId;
         $account = $this->getLocaleBox()->getAccount($userId);
         if($account){
             $this->remoteBox = new RemoteMailbox(
@@ -91,13 +94,11 @@ class Mailbox {
       }
     }
 
+    /**
+     * add to receive queue
+     */
     public function receive(){
-        $updated_at = $this->getLocaleBox()->getUpdatedAt();
-        $mailIds = $this->remoteBox->searchMailbox('SINCE "'.$updated_at.'"');
-        foreach($mailIds as $mailId){
-            $this->saveToLocale($mailId);
-        }
-        $this->syncMailStatus($mailIds);
+        \Queue::push('\DavinBao\Mailbox\MailWorker@receiveRecentMail', array('user_id' => $this->userId), 'low');
     }
 
     private function saveToLocale($mailId){
@@ -105,13 +106,12 @@ class Mailbox {
             return;
         }
         $incomingMail = $this->remoteBox->getMail($mailId);
-        var_dump($incomingMail);exit;
-        $this->localeBox->saveMail($incomingMail);
+        $this->getLocaleBox()->saveMail($incomingMail);
     }
 
     private function isSaved($mailId){
         $mailUid = $this->remoteBox->getUid($mailId);
-        if($this->localeBox->isExistInLocale($mailUid)){
+        if($this->getLocaleBox()->isExistInLocale($mailUid)){
             return true;
         }
         return false;
@@ -119,51 +119,51 @@ class Mailbox {
 
     private function syncMailStatus($mailsIds){
         $mailStatus = $this->remoteBox->getMailsInfo($mailsIds);
-        $this->localeBox->syncMailStatus($mailStatus);
+        $this->getLocaleBox()->syncMailStatus($mailStatus);
     }
 
     public function getMail($id){
-        return $this->localeBox->getMail($id);
+        return $this->getLocaleBox()->getMail($id);
     }
 
     public function markMailAsRead($mailId){
       $this->remoteBox->setFlag(array($mailId), '\\Seen');
       $mailUid = $this->remoteBox->getUid($mailId);
-      $this->localeBox->setFlag(array($mailUid), '\\Seen');
+      $this->getLocaleBox()->setFlag(array($mailUid), '\\Seen');
     }
 
     public function markMailAsUnRead($mailId){
       $this->remoteBox->clearFlag(array($mailId), '\\Seen');
       $mailUid = $this->remoteBox->getUid($mailId);
-      $this->localeBox->clearFlag(array($mailUid), '\\Seen');
+      $this->getLocaleBox()->clearFlag(array($mailUid), '\\Seen');
     }
 
     public function markMailAsImportant($mailId) {
       $this->remoteBox->setFlag(array($mailId), '\\Flagged');
       $mailUid = $this->remoteBox->getUid($mailId);
-      $this->localeBox->setFlag(array($mailUid), '\\Flagged');
+      $this->getLocaleBox()->setFlag(array($mailUid), '\\Flagged');
     }
 
     public function markMailAsNoImportant($mailId) {
       $this->remoteBox->clearFlag(array($mailId), '\\Flagged');
       $mailUid = $this->remoteBox->getUid($mailId);
-      $this->localeBox->clearFlag(array($mailUid), '\\Flagged');
+      $this->getLocaleBox()->clearFlag(array($mailUid), '\\Flagged');
     }
 
     public function markMailDeleted($mailId){
       $mailUid = $this->remoteBox->getUid($mailId);
-      $this->localeBox->setFlag(array($mailUid), '\\Deleted');
+      $this->getLocaleBox()->setFlag(array($mailUid), '\\Deleted');
     }
 
     public function markMailUnDeleted($mailId){
       $mailUid = $this->remoteBox->getUid($mailId);
-      $this->localeBox->clearFlag(array($mailUid), '\\Deleted');
+      $this->getLocaleBox()->clearFlag(array($mailUid), '\\Deleted');
     }
 
     public function send(IncomingMail $incomingMail, $isSaveSent=true, $delay = 0){
       if($isSaveSent){
-        $this->localeBox->saveMail($incomingMail);
-        $this->localeBox->setFlag(array($incomingMail->uid), '\\Sent');
+        $this->getLocaleBox()->saveMail($incomingMail);
+        $this->getLocaleBox()->setFlag(array($incomingMail->uid), '\\Sent');
       }
       MailWorker::sendMail($incomingMail,'', $delay);
     }

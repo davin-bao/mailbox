@@ -26,6 +26,8 @@ class Address extends Ardent
 
     protected $guarded = array();
 
+    public $timestamps = false;
+
     /**
      * Laravel application
      *
@@ -52,6 +54,16 @@ class Address extends Ardent
 
         if ( ! static::$app )
             static::$app = app();
+    }
+
+    public static function getNewAddress($address, $name){
+        $entAddress = Address::where("address", "=", $address)->first();
+        if(!$entAddress){
+            $entAddress = new Address();
+            $entAddress->address = $address;
+            $entAddress->name = $name;
+        }
+        return $entAddress;
     }
 
 }

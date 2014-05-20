@@ -43,7 +43,7 @@ class Attachment extends Ardent
     );
 
     public static $relationsData = array(
-        'entity'    => array(self::BELONGS_TO, 'Entity')
+        'entity'    => array(self::BELONGS_TO, '\DavinBao\Mailbox\Entity')
     );
     /**
      * Creates a new instance of the model

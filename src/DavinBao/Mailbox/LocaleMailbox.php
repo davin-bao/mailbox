@@ -56,7 +56,7 @@ class LocaleMailbox
         $entity->text_html = $incomingMail->textHtml;
         $entity->uid = $incomingMail->uid;
         $this->account->Entities()->save($entity);
-        foreach($incomingMail->attachments as $attach){
+        foreach($incomingMail->getAttachments() as $attach){
             $attachment = new Attachment();
             $attachment->name = $attach->name;
             $attachment->file_path = $attach->filePath;
@@ -64,26 +64,19 @@ class LocaleMailbox
             $entity->Attachments()->save($attachment);
         }
         foreach($incomingMail->to as $key=>$value){
-          $address = new Address();
-          $address->address = $key;
-          $address->name = $value;
+          $address = Address::getNewAddress($key, $value);
           $entity->ToAddresses()->save($address);
         }
 
         foreach($incomingMail->cc as $key=>$value){
-          $address = new Address();
-          $address->address = $key;
-          $address->name = $value;
+            $address = Address::getNewAddress($key, $value);
           $entity->CcAddresses()->save($address);
         }
 
         foreach($incomingMail->replyTo as $key=>$value){
-          $address = new Address();
-          $address->address = $key;
-          $address->name = $value;
+            $address = Address::getNewAddress($key, $value);
           $entity->ReplyAddresses()->save($address);
         }
-
         return $entity->id;
     }
 
@@ -91,14 +84,22 @@ class LocaleMailbox
         return Entity::find($id);
     }
 
+    public function syncMailBoxStatus($boxStatus){
+        if($this->account){
+            $this->account->message_count = $boxStatus->messages;
+            $this->account->unseen_count = $boxStatus->unseen;
+            $this->account->forceSave();
+        }
+    }
+
     public function syncMailStatus($mailsStatus){
       foreach ($mailsStatus as $mailStatus) {
-        $mail = Entity::where('uid','=', $mailStatus->uid);
+        $mail = Entity::where('uid','=', $mailStatus->uid)->first();
         if(!$mail){
           continue;
         }
-        $mail->seen = $mailsStatus->seen;
-        $mail->flagged = $mailsStatus->flagged;
+        $mail->seen = $mailStatus->seen;
+        $mail->flagged = $mailStatus->flagged;
         $mail->save();
       }
     }

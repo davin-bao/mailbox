@@ -42,7 +42,6 @@ class RemoteMailbox
         }
         $this->attachmentsDir = rtrim(realpath($attachmentsDir), '\\/');
 
-
     }
 
 
@@ -276,7 +275,7 @@ class RemoteMailbox
                 if(isset($mail->udate)) {
                     $mail->udate = $this->decodeMimeStr($mail->udate, $this->serverEncoding);
                 }
-                $mail->uid = $this->getUid($mail->id);
+                $mail->uid = $this->getUid($mail->uid);
             }
         }
         return $mails;

@@ -42,11 +42,11 @@ class Entity extends Ardent
     );
 
     public static $relationsData = array(
-        'Account'    => array(self::BELONGS_TO, 'Account'),
-        'Attachments'    => array(self::HAS_MANY, 'Attachment'),
-        'ToAddresses' => array(self::BELONGS_TO_MANY, 'Address', 'to_addresses', 'mail_entity_id', 'mail_address_id'),
-        'CcAddresses' => array(self::BELONGS_TO_MANY, 'Address', 'cc_addresses', 'mail_entity_id', 'mail_address_id'),
-        'ReplyAddresses' => array(self::BELONGS_TO_MANY, 'Address', 'reply_addresses', 'mail_entity_id', 'mail_address_id')
+        'Account'    => array(self::BELONGS_TO, '\DavinBao\Mailbox\Account'),
+        'Attachments'    => array(self::HAS_MANY, '\DavinBao\Mailbox\Attachment'),
+        'ToAddresses' => array(self::BELONGS_TO_MANY,'\DavinBao\Mailbox\Address',  'table'=>'to_addresses', 'foreignKey'=>'mail_entity_id','otherKey'=>'mail_address_id'),
+        'CcAddresses' => array(self::BELONGS_TO_MANY, '\DavinBao\Mailbox\Address', 'table'=> 'cc_addresses','foreignKey'=> 'mail_entity_id', 'otherKey'=>'mail_address_id'),
+        'ReplyAddresses' => array(self::BELONGS_TO_MANY, '\DavinBao\Mailbox\Address',  'table'=>'reply_addresses', 'foreignKey'=>'mail_entity_id','otherKey'=>'mail_address_id')
     );
     /**
      * Creates a new instance of the model
