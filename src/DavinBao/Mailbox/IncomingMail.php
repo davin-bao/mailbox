@@ -4,6 +4,7 @@ namespace DavinBao\Mailbox;
 class IncomingMail {
 
     public $id;
+    public $uid;
     public $date;
     public $subject;
 

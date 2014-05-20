@@ -15,9 +15,7 @@ class Mailbox {
     private $localeBox = false;
 
     const SORT_DATE = 'date';
-
     const SORT_FROM = 'from_name';
-
     const SORT_SUBJECT = 'subject';
 
     const BOX_UNSEEN = 'UNSEEN';
@@ -76,12 +74,21 @@ class Mailbox {
         return $this->getLocaleBox()->register($accountData);
     }
 
-    public function isSaved($mailId){
-        $mailUid = $this->remoteBox->getUid($mailId);
-        if($this->localeBox->isExistInLocale($mailUid)){
-            return true;
-        }
-        return false;
+    public function search($flag= self::BOX_UNSEEN, $order = self::SORT_DATE, $reverse = false){
+
+      switch($flag){
+        case self::BOX_DELETED:
+          return $this->getLocaleBox()->searchDeletedbox($order, $reverse);
+        case self::BOX_SENT:
+          return $this->getLocaleBox()->searchSentbox($order, $reverse);
+        case self::BOX_FLAGED:
+          return $this->getLocaleBox()->searchFlagedbox($order, $reverse);
+        case self::BOX_UNSEEN:
+          return $this->getLocaleBox()->searchUnseenbox($order, $reverse);
+        case self::BOX_UNSEEN:
+        default:
+          return $this->getLocaleBox()->searchInbox($order, $reverse);
+      }
     }
 
     public function receive(){
@@ -90,46 +97,74 @@ class Mailbox {
         foreach($mailIds as $mailId){
             $this->saveToLocale($mailId);
         }
+        $this->syncMailStatus($mailIds);
     }
 
-    public function search($flag= self::BOX_UNSEEN, $since=null, $order = self::SORT_DATE, $reverse = false){
-        $mails = array();
-        switch($flag){
-            case 'SENT':
-                break;
-            case 'DELETED':
-                break;
-            case self::BOX_IN:
-                return $this->getLocaleBox()->searchInbox($order, $reverse);
-        }
-    }
-
-    public function saveToLocale($mailId){
+    private function saveToLocale($mailId){
         if($this->isSaved($mailId)){
             return;
         }
         $incomingMail = $this->remoteBox->getMail($mailId);
-        var_dump($incomingMail);
-       //$this->localeBox->saveMail($incomingMail);
+        var_dump($incomingMail);exit;
+        $this->localeBox->saveMail($incomingMail);
     }
 
-    public function refreshLocaleStatus($mailsIds){
+    private function isSaved($mailId){
+        $mailUid = $this->remoteBox->getUid($mailId);
+        if($this->localeBox->isExistInLocale($mailUid)){
+            return true;
+        }
+        return false;
+    }
+
+    private function syncMailStatus($mailsIds){
         $mailStatus = $this->remoteBox->getMailsInfo($mailsIds);
+        $this->localeBox->syncMailStatus($mailStatus);
     }
 
-    public function getMail($mailId){}
+    public function getMail($id){
+        return $this->localeBox->getMail($id);
+    }
 
-    public function markMailAsRead($mailId){}
+    public function markMailAsRead($mailId){
+      $this->remoteBox->setFlag(array($mailId), '\\Seen');
+      $mailUid = $this->remoteBox->getUid($mailId);
+      $this->localeBox->setFlag(array($mailUid), '\\Seen');
+    }
 
-    public function markMailAsUnRead($mailId){}
+    public function markMailAsUnRead($mailId){
+      $this->remoteBox->clearFlag(array($mailId), '\\Seen');
+      $mailUid = $this->remoteBox->getUid($mailId);
+      $this->localeBox->clearFlag(array($mailUid), '\\Seen');
+    }
 
-    public function markMailAsImportant($mailId) {}
+    public function markMailAsImportant($mailId) {
+      $this->remoteBox->setFlag(array($mailId), '\\Flagged');
+      $mailUid = $this->remoteBox->getUid($mailId);
+      $this->localeBox->setFlag(array($mailUid), '\\Flagged');
+    }
 
-    public function markMailAsNoImportant($mailId) {}
+    public function markMailAsNoImportant($mailId) {
+      $this->remoteBox->clearFlag(array($mailId), '\\Flagged');
+      $mailUid = $this->remoteBox->getUid($mailId);
+      $this->localeBox->clearFlag(array($mailUid), '\\Flagged');
+    }
 
-    public function markMailDeleted($mailId){}
+    public function markMailDeleted($mailId){
+      $mailUid = $this->remoteBox->getUid($mailId);
+      $this->localeBox->setFlag(array($mailUid), '\\Deleted');
+    }
 
-    public function markMailUnDeleted($mailId){}
+    public function markMailUnDeleted($mailId){
+      $mailUid = $this->remoteBox->getUid($mailId);
+      $this->localeBox->clearFlag(array($mailUid), '\\Deleted');
+    }
 
-    public function send(IncomingMail $mail, $isSaveSent=true, $delay = 0){}
+    public function send(IncomingMail $incomingMail, $isSaveSent=true, $delay = 0){
+      if($isSaveSent){
+        $this->localeBox->saveMail($incomingMail);
+        $this->localeBox->setFlag(array($incomingMail->uid), '\\Sent');
+      }
+      MailWorker::sendMail($incomingMail,'', $delay);
+    }
 }

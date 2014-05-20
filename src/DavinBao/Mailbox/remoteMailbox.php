@@ -276,6 +276,7 @@ class RemoteMailbox
                 if(isset($mail->udate)) {
                     $mail->udate = $this->decodeMimeStr($mail->udate, $this->serverEncoding);
                 }
+                $mail->uid = $this->getUid($mail->id);
             }
         }
         return $mails;

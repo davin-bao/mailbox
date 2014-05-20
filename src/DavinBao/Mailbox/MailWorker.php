@@ -68,4 +68,25 @@ class MailWorker {
 
         $job->delete();
     }
+
+    public static function sendMail($incomingMail, $view, $delay){
+      Mail::later($delay, $view,array('incomingMail' => $incomingMail), function($m) use ($incomingMail)
+      {
+        $m->from($incomingMail->fromAddress, $incomingMail->fromName);
+        foreach ($incomingMail->to as $key=>$value) {
+          $m = $m->to($key, $value);
+        }
+        foreach ($incomingMail->cc as $key=>$value) {
+          $m = $m->cc($key, $value);
+        }
+        foreach ($incomingMail->replyTo as $key=>$value) {
+          $m = $m->replyTo($key, $value);
+        }
+
+        $m->subject($incomingMail->subject);
+        foreach($incomingMail->attachments as $attachment){
+          $m->attach($attachment->filePath, array('as' => $attachment->name));
+        }
+      }, 'low');
+    }
 }

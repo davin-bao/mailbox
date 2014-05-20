@@ -47,6 +47,7 @@ class LocaleMailbox
 
     public function saveMail($incomingMail){
         $entity = new Entity();
+        $entity->mail_id = $incomingMail->id;
         $entity->date = $incomingMail->date;
         $entity->subject = $incomingMail->subject;
         $entity->from_name = $incomingMail->fromName;
@@ -63,12 +64,94 @@ class LocaleMailbox
             $entity->Attachments()->save($attachment);
         }
         foreach($incomingMail->to as $key=>$value){
-            $address = new Address();
-            
+          $address = new Address();
+          $address->address = $key;
+          $address->name = $value;
+          $entity->ToAddresses()->save($address);
         }
+
+        foreach($incomingMail->cc as $key=>$value){
+          $address = new Address();
+          $address->address = $key;
+          $address->name = $value;
+          $entity->CcAddresses()->save($address);
+        }
+
+        foreach($incomingMail->replyTo as $key=>$value){
+          $address = new Address();
+          $address->address = $key;
+          $address->name = $value;
+          $entity->ReplyAddresses()->save($address);
+        }
+
+        return $entity->id;
     }
 
-    public function getInbox($orders, $reverse = false){
-        return $this->account->entities()->where('sent', '=', false)->orderBy($orders, $reverse?"DESC":"ASC")->get();
+    public function getMail($id) {
+        return Entity::find($id);
     }
+
+    public function syncMailStatus($mailsStatus){
+      foreach ($mailsStatus as $mailStatus) {
+        $mail = Entity::where('uid','=', $mailStatus->uid);
+        if(!$mail){
+          continue;
+        }
+        $mail->seen = $mailsStatus->seen;
+        $mail->flagged = $mailsStatus->flagged;
+        $mail->save();
+      }
+    }
+
+  public function searchDeletedbox($orders, $reverse = false){
+    return $this->account->entities()->where('deleted', '=', true)->andWhere('sent', '=', false)->orderBy($orders, $reverse?"DESC":"ASC")->get();
+  }
+
+  public function searchSentbox($orders, $reverse = false){
+    return $this->account->entities()->where('send', '=', true)->orderBy($orders, $reverse?"DESC":"ASC")->get();
+  }
+
+  public function searchFlagedbox($orders, $reverse = false){
+    return $this->account->entities()->where('flaged', '=', true)->andWhere('sent', '=', false)->orderBy($orders, $reverse?"DESC":"ASC")->get();
+  }
+
+  public function searchUnseenbox($orders, $reverse = false){
+    return $this->account->entities()->where('seen', '=', false)->andWhere('sent', '=', false)->orderBy($orders, $reverse?"DESC":"ASC")->get();
+  }
+
+  public function searchInbox($orders, $reverse = false){
+    return $this->account->entities()->where('sent', '=', false)->orderBy($orders, $reverse?"DESC":"ASC")->get();
+  }
+
+  public function setFlag(array $mailUids, $flag) {
+    $this->setMailFlag($mailUids, $flag, true);
+  }
+
+  public function clearFlag(array $mailUids, $flag) {
+    $this->setMailFlag($mailUids, $flag, false);
+  }
+
+  private function setMailFlag($mailUids, $flag, $value = false){
+    foreach($mailUids as $mailUid){
+      $mailEntity = Entity::where('uid', '=', $mailUid)->first();
+      if($mailEntity){
+        switch($flag){
+          case "\\Seen":
+            $mailEntity->seen = $value;
+            break;
+          case "\\Sent":
+            $mailEntity->sent = $value;
+            break;
+          case "\\Flagged":
+            $mailEntity->flagged = $value;
+            break;
+          case "\\Deleted":
+            $mailEntity->deleted = $value;
+            break;
+        }
+        $mailEntity->save();
+      }
+    }
+  }
+
 }
