@@ -8,6 +8,8 @@
 
 namespace DavinBao\Mailbox;
 
+use Illuminate\Support\SerializableClosure;
+
 class MailWorker {
 
     public function receiveRecentMail($job, $data){
@@ -52,25 +54,89 @@ class MailWorker {
     }
 
     public static function sendMail($incomingMail, $view, $delay){
-      \Mail::later($delay, $view,array('incomingMail' => $incomingMail), function($m) use ($incomingMail)
-      {
-        $m->from($incomingMail->fromAddress, $incomingMail->fromName);
-        foreach ($incomingMail->to as $key=>$value) {
-          $m = $m->to($key, $value);
-        }
-        foreach ($incomingMail->cc as $key=>$value) {
-          $m = $m->cc($key, $value);
-        }
-        foreach ($incomingMail->replyTo as $key=>$value) {
-          $m = $m->replyTo($key, $value);
+
+        $callback = MailWorker::buildQueueCallable(function($m) use ($incomingMail)
+        {
+            $m->from($incomingMail->fromAddress, $incomingMail->fromName);
+            foreach ($incomingMail->to as $key=>$value) {
+                $m = $m->to($key, $value);
+            }
+            foreach ($incomingMail->cc as $key=>$value) {
+                $m = $m->cc($key);
+            }
+            foreach ($incomingMail->replyTo as $key=>$value) {
+                $m = $m->replyTo($key);
+            }
+
+            $m->subject($incomingMail->subject);
+            foreach($incomingMail->attachments as $attachment){
+                $m->attach($attachment->filePath, array('as' => $attachment->name));
+            }
+
+
+            \Log::info('The mail "'.$incomingMail->subject.'" was sent.');
+        });
+
+        $data = array('incomingMail' => $incomingMail);
+
+        \Queue::later($delay, '\DavinBao\Mailbox\MailWorker@handleQueuedMessage', compact('view', 'data', 'callback'), 'low');
+
+
+//      \Mail::later($delay, $view,array('incomingMail' => $incomingMail), function($m) use ($incomingMail)
+//      {
+//        $m->from($incomingMail->fromAddress, $incomingMail->fromName);
+//        foreach ($incomingMail->to as $key=>$value) {
+//          $m = $m->to($key, $value);
+//        }
+//        foreach ($incomingMail->cc as $key=>$value) {
+//          $m = $m->cc($key);
+//        }
+//        foreach ($incomingMail->replyTo as $key=>$value) {
+//          $m = $m->replyTo($key);
+//        }
+//
+//        $m->subject($incomingMail->subject);
+//        foreach($incomingMail->attachments as $attachment){
+//          $m->attach($attachment->filePath, array('as' => $attachment->name));
+//        }
+//
+//
+//        \Log::info('The mail "'.$incomingMail->subject.'" was sent.');
+//      }, 'low');
+    }
+
+    public function handleQueuedMessage($job, $data){
+        $job->delete();
+        \Mail::send($data['view'], $data['data'], MailWorker::getQueuedCallable($data));
+    }
+
+    /**
+     * Build the callable for a queued e-mail job.
+     *
+     * @param  mixed  $callback
+     * @return mixed
+     */
+    protected static function buildQueueCallable($callback)
+    {
+        if ( ! $callback instanceof \Closure) return $callback;
+
+        return serialize(new SerializableClosure($callback));
+    }
+
+
+    /**
+     * Get the true callable for a queued e-mail message.
+     *
+     * @param  array  $data
+     * @return mixed
+     */
+    protected static function getQueuedCallable(array $data)
+    {
+        if (str_contains($data['callback'], 'SerializableClosure'))
+        {
+            return with(unserialize($data['callback']))->getClosure();
         }
 
-        $m->subject($incomingMail->subject);
-        foreach($incomingMail->attachments as $attachment){
-          $m->attach($attachment->filePath, array('as' => $attachment->name));
-        }
-
-        \Log::info('The mail "'.$incomingMail->subject.'" was sent.');
-      }, 'low');
+        return $data['callback'];
     }
 }

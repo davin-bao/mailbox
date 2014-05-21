@@ -165,6 +165,9 @@ class Mailbox {
         $this->getLocaleBox()->saveMail($incomingMail);
         $this->getLocaleBox()->setFlag(array($incomingMail->uid), '\\Sent');
       }
-      MailWorker::sendMail($incomingMail,'', $delay);
+
+
+        $view = $this->_app['config']->get('mailbox::emails_default_form');
+      MailWorker::sendMail($incomingMail, $view, $delay);
     }
 }
