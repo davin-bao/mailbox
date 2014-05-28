@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: Administrator
  * Date: 14-5-19
- * Time: ä¸‹åˆ7:40
+ * Time: ÏÂÎç7:40
  */
 
 namespace DavinBao\Mailbox;

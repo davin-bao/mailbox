@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: Administrator
  * Date: 14-5-18
- * Time: ä¸‹åˆ5:57
+ * Time: ÏÂÎç5:57
  */
 
 namespace DavinBao\Mailbox;
@@ -72,15 +72,13 @@ class MailWorker {
             foreach($incomingMail->attachments as $attachment){
                 $m->attach($attachment->filePath, array('as' => $attachment->name));
             }
-
-
             \Log::info('The mail "'.$incomingMail->subject.'" was sent.');
         });
 
         $data = array('incomingMail' => $incomingMail);
 
         \Queue::later($delay, '\DavinBao\Mailbox\MailWorker@handleQueuedMessage', compact('view', 'data', 'callback'), 'low');
-
+        var_dump('sendMail');
 
 //      \Mail::later($delay, $view,array('incomingMail' => $incomingMail), function($m) use ($incomingMail)
 //      {

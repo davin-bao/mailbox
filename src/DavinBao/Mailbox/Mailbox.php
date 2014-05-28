@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: Administrator
  * Date: 14-5-18
- * Time: ä¸‹åˆ12:07
+ * Time: ÏÂÎç12:07
  */
 
 namespace DavinBao\Mailbox;
@@ -165,9 +165,7 @@ class Mailbox {
         $this->getLocaleBox()->saveMail($incomingMail);
         $this->getLocaleBox()->setFlag(array($incomingMail->uid), '\\Sent');
       }
-
-
-        $view = $this->_app['config']->get('mailbox::emails_default_form');
+      $view = $this->_app['config']->get('mailbox::emails_default_form');
       MailWorker::sendMail($incomingMail, $view, $delay);
     }
 }
