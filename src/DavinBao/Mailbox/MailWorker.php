@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: Administrator
  * Date: 14-5-18
- * Time: ÏÂÎç5:57
+ * Time: ï¿½ï¿½ï¿½ï¿½5:57
  */
 
 namespace DavinBao\Mailbox;
@@ -70,7 +70,7 @@ class MailWorker {
 
             $m->subject($incomingMail->subject);
             foreach($incomingMail->attachments as $attachment){
-                $m->attach($attachment->filePath, array('as' => $attachment->name));
+                $m->attach($attachment->filePath, array('as' => $attachment->name.".". $attachment->extName));
             }
             \Log::info('The mail "'.$incomingMail->subject.'" was sent.');
         });
@@ -78,29 +78,6 @@ class MailWorker {
         $data = array('incomingMail' => $incomingMail);
 
         \Queue::later($delay, '\DavinBao\Mailbox\MailWorker@handleQueuedMessage', compact('view', 'data', 'callback'), 'low');
-        var_dump('sendMail');
-
-//      \Mail::later($delay, $view,array('incomingMail' => $incomingMail), function($m) use ($incomingMail)
-//      {
-//        $m->from($incomingMail->fromAddress, $incomingMail->fromName);
-//        foreach ($incomingMail->to as $key=>$value) {
-//          $m = $m->to($key, $value);
-//        }
-//        foreach ($incomingMail->cc as $key=>$value) {
-//          $m = $m->cc($key);
-//        }
-//        foreach ($incomingMail->replyTo as $key=>$value) {
-//          $m = $m->replyTo($key);
-//        }
-//
-//        $m->subject($incomingMail->subject);
-//        foreach($incomingMail->attachments as $attachment){
-//          $m->attach($attachment->filePath, array('as' => $attachment->name));
-//        }
-//
-//
-//        \Log::info('The mail "'.$incomingMail->subject.'" was sent.');
-//      }, 'low');
     }
 
     public function handleQueuedMessage($job, $data){
