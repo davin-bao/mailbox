@@ -27,11 +27,7 @@ class LocaleMailbox
      */
     public function register(array $accountData){
         $this->account = Account::firstOrCreate($accountData);
-        if($this->account->save()){
-            return $this->account;
-        }else{
-            return $this->account->errors()->all();
-        }
+        return $this->account;
     }
 
     public function getUpdatedAt($format='d M Y'){

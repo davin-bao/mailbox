@@ -3,7 +3,7 @@
  * Created by PhpStorm.
  * User: Administrator
  * Date: 14-5-18
- * Time: ÏÂÎç12:07
+ * Time: ï¿½ï¿½ï¿½ï¿½12:07
  */
 
 namespace DavinBao\Mailbox;
@@ -88,7 +88,6 @@ class Mailbox {
           return $this->getLocaleBox()->searchFlagedbox($order, $reverse);
         case self::BOX_UNSEEN:
           return $this->getLocaleBox()->searchUnseenbox($order, $reverse);
-        case self::BOX_UNSEEN:
         default:
           return $this->getLocaleBox()->searchInbox($order, $reverse);
       }

@@ -63,8 +63,14 @@ class MailboxServiceProvider extends ServiceProvider {
             return new MailQueueCommand($app);
         });
 
+        $this->app['command.mailbox.migration'] = $this->app->share(function($app)
+        {
+            return new MigrationCommand($app);
+        });
+
         $this->commands(
-            'command.mailbox.work'
+            'command.mailbox.work',
+            'command.mailbox.migration'
         );
     }
 }
