@@ -31,7 +31,7 @@ class CreateMailboxTable extends Migration {
         Schema::create('mail_addresses',function($table){
             $table->increments('id');
             $table->string('address')->unique();
-            $table->string('name');
+            $table->string('name')->nullabled();
             $table->integer('user_id')->unsigned();
         });
 

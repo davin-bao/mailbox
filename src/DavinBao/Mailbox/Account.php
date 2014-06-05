@@ -49,7 +49,7 @@ class Account extends Ardent
 
 
     public static $relationsData = array(
-        'Entities'    => array(self::HAS_MANY, '\DavinBao\Mailbox\Entity')
+        'entities'    => array(self::HAS_MANY, '\DavinBao\Mailbox\Entity')
     );
 
     /**
