@@ -48,30 +48,30 @@ class LocaleMailbox
         $entity->subject = $incomingMail->subject;
         $entity->from_name = $incomingMail->fromName;
         $entity->from_address = $incomingMail->fromAddress;
-        $entity->text_plain = $incomingMail->fromAddress;
+        $entity->text_plain = $incomingMail->text_plain;
         $entity->text_html = $incomingMail->textHtml;
         $entity->uid = $incomingMail->uid;
-        $this->account->Entities()->save($entity);
+        $this->account->entities()->save($entity);
         foreach($incomingMail->getAttachments() as $attach){
             $attachment = new Attachment();
             $attachment->name = $attach->name;
             $attachment->file_path = $attach->filePath;
             $attachment->ext_name = $attach->extName;
-            $entity->Attachments()->save($attachment);
+            $entity->attachments()->save($attachment);
         }
         foreach($incomingMail->to as $key=>$value){
           $address = Address::getNewAddress($key, $value);
-          $entity->ToAddresses()->save($address);
+          $entity->toAddresses()->save($address);
         }
 
         foreach($incomingMail->cc as $key=>$value){
             $address = Address::getNewAddress($key, $value);
-          $entity->CcAddresses()->save($address);
+          $entity->ccAddresses()->save($address);
         }
 
         foreach($incomingMail->replyTo as $key=>$value){
             $address = Address::getNewAddress($key, $value);
-          $entity->ReplyAddresses()->save($address);
+          $entity->replyAddresses()->save($address);
         }
         return $entity->id;
     }
