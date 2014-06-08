@@ -101,19 +101,19 @@ class LocaleMailbox
     }
 
   public function searchDeletedbox($orders, $reverse = false){
-    return $this->account->entities()->where('deleted', '=', true)->andWhere('sent', '=', false)->orderBy($orders, $reverse?"DESC":"ASC")->get();
+    return $this->account->entities()->where('deleted', '=', true)->where('sent', '=', false)->orderBy($orders, $reverse?"DESC":"ASC")->get();
   }
 
   public function searchSentbox($orders, $reverse = false){
-    return $this->account->entities()->where('send', '=', true)->orderBy($orders, $reverse?"DESC":"ASC")->get();
+    return $this->account->entities()->where('sent', '=', true)->orderBy($orders, $reverse?"DESC":"ASC")->get();
   }
 
-  public function searchFlagedbox($orders, $reverse = false){
-    return $this->account->entities()->where('flaged', '=', true)->andWhere('sent', '=', false)->orderBy($orders, $reverse?"DESC":"ASC")->get();
+  public function searchFlaggedbox($orders, $reverse = false){
+    return $this->account->entities()->where('flagged', '=', true)->where('sent', '=', false)->orderBy($orders, $reverse?"DESC":"ASC")->get();
   }
 
   public function searchUnseenbox($orders, $reverse = false){
-    return $this->account->entities()->where('seen', '=', false)->andWhere('sent', '=', false)->orderBy($orders, $reverse?"DESC":"ASC")->get();
+    return $this->account->entities()->where('seen', '=', false)->where('sent', '=', false)->orderBy($orders, $reverse?"DESC":"ASC")->get();
   }
 
   public function searchInbox($orders, $reverse = false){

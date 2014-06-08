@@ -20,7 +20,7 @@ class Mailbox {
 
     const BOX_UNSEEN = 'UNSEEN';
     const BOX_IN = 'ALL';
-    const BOX_FLAGED = 'FLAGED';
+    const BOX_FLAGGED = 'FLAGGED';
     const BOX_SENT = 'SENT';
     const BOX_DELETED = 'DELETED';
 
@@ -84,8 +84,8 @@ class Mailbox {
           return $this->getLocaleBox()->searchDeletedbox($order, $reverse);
         case self::BOX_SENT:
           return $this->getLocaleBox()->searchSentbox($order, $reverse);
-        case self::BOX_FLAGED:
-          return $this->getLocaleBox()->searchFlagedbox($order, $reverse);
+        case self::BOX_FLAGGED:
+          return $this->getLocaleBox()->searchFlaggedbox($order, $reverse);
         case self::BOX_UNSEEN:
           return $this->getLocaleBox()->searchUnseenbox($order, $reverse);
         default:
