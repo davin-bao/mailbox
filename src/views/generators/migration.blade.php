@@ -40,11 +40,11 @@ class CreateMailboxTable extends Migration {
             $table->integer('account_id')->unsigned();
             $table->integer('mail_id')->unsigned()->nullable();
             $table->timestamp('date');
-            $table->string('subject');
-            $table->string('from_name');
+            $table->string('subject')->nullable();
+            $table->string('from_name')->nullable();
             $table->string('from_address');
-            $table->text('text_plain');
-            $table->text('text_html');
+            $table->text('text_plain')->nullable();
+            $table->text('text_html')->nullable();
             $table->string('uid')->nullable();
             $table->boolean('flagged')->default(false);
             $table->boolean('seen')->default(false);
@@ -82,9 +82,9 @@ class CreateMailboxTable extends Migration {
         Schema::create('mail_attachments', function($table){
             $table->increments('id');
             $table->integer('entity_id')->unsigned();
-            $table->string('name');
-            $table->string('file_path');
-            $table->string('ext_name');
+            $table->string('name')->nullable();
+            $table->string('file_path')->nullable();
+            $table->string('ext_name')->nullable();
             $table->foreign('entity_id')->references('id')->on('mail_entities')->onDelete('cascade');
             $table->timestamps();
         });

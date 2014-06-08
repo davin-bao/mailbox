@@ -27,6 +27,13 @@ class LocaleMailbox
      */
     public function register(array $accountData){
         $this->account = Account::firstOrCreate($accountData);
+
+        $time = $this->account->freshTimestamp()->subDays(15);
+        $this->account->setUpdatedAt($time);
+        $this->account->timestamps = false;
+        $this->account->forceSave();
+        $this->account->validationErrors = new MessageBag();
+
         return $this->account;
     }
 
@@ -48,7 +55,7 @@ class LocaleMailbox
         $entity->subject = $incomingMail->subject;
         $entity->from_name = $incomingMail->fromName;
         $entity->from_address = $incomingMail->fromAddress;
-        $entity->text_plain = $incomingMail->text_plain;
+        $entity->text_plain = $incomingMail->textPlain;
         $entity->text_html = $incomingMail->textHtml;
         $entity->uid = $incomingMail->uid;
         $this->account->entities()->save($entity);
