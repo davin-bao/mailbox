@@ -32,7 +32,7 @@ class LocaleMailbox
         $this->account->setUpdatedAt($time);
         $this->account->timestamps = false;
         $this->account->forceSave();
-        $this->account->validationErrors = new MessageBag();
+        $this->account->validationErrors = new \MessageBag();
 
         return $this->account;
     }
