@@ -166,5 +166,6 @@ class Mailbox {
       }
       $view = $this->_app['config']->get('mailbox::emails_default_form');
       MailWorker::sendMail($incomingMail, $view, $delay);
+      return true;
     }
 }
