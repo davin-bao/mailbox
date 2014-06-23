@@ -29,7 +29,7 @@ class MailWorker {
                 $account->host_port,
                 false,
                 'utf-8',
-                storage_path()."\\attachments"
+                public_path()."\\attachments"
             );
             //get recent receive mail date
             $updated_at = $localeBox->getUpdatedAt();
