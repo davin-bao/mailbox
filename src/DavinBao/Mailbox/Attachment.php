@@ -57,7 +57,7 @@ class Attachment extends Ardent
     }
 
     
-    public function getDownloadPath($file_path){
+    public function getDownloadPath(){
       return URL::to(str_replace('index.php','',URL::to('/')).'documents/'.str_replace(storage_path()."\\attachments", '', $this->file_path));
     }
 
