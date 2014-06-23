@@ -58,8 +58,8 @@ class Mailbox {
                 $account->host_protocol,
                 $account->host_port,
                 false,
-                'utf-8',
-                storage_path()."\\attachments"
+                'utf8',
+                public_path()."\\attachments"
             );
             $this->isRegister = true;
         }
